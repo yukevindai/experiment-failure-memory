@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Experiment Failure Memory</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">EFM <span>Experiment Failure Memory</span></a>
+      <div id="identity"></div>
+    </header>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <main>
+      <section id="login-panel" class="login panel">
+        <div class="eyebrow">KNOWLEDGE FROM EVERY ATTEMPT</div>
+        <h1>A failed experiment.<br />A useful starting point.</h1>
+        <p>
+          Preserve the conditions, uncertainty, and lessons behind your
+          laboratory’s unsuccessful attempts.
+        </p>
+        <form id="login-form">
+          <label
+            >Username<input
+              name="username"
+              autocomplete="username"
+              required /></label
+          ><label
+            >Password<input
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              required /></label
+          ><button>Sign in</button>
+        </form>
+        <p class="muted">
+          Private workspace. Ask your server operator for an account.
+        </p>
+      </section>
+      <section id="workspace" hidden>
+        <div class="heading">
+          <div>
+            <div class="eyebrow">LABORATORY MEMORY</div>
+            <h1>Learn from what happened.</h1>
+            <p class="muted">
+              Traceable observations, connected attempts, better informed next
+              steps.
+            </p>
+          </div>
+          <button id="new-record">Record an experiment</button>
+        </div>
+        <div class="toolbar panel">
+          <label
+            >Project<select id="project">
+              <option value="">All accessible projects</option>
+            </select></label
+          ><label class="grow"
+            >Search failures<input
+              id="query"
+              type="search"
+              placeholder="Material, equipment, cause, procedure…" /></label
+          ><label
+            >Outcome<select id="status">
+              <option value="">All outcomes</option>
+              <option>failed</option>
+              <option>partial</option>
+              <option>succeeded</option>
+              <option>inconclusive</option>
+            </select></label
+          ><label class="check"
+            ><input id="archived" type="checkbox" />Archived</label
+          ><button id="search">Search</button>
+        </div>
+        <nav class="tabs" aria-label="Workspace views">
+          <button data-tab="records">Experiments</button
+          ><button data-tab="patterns">Patterns & recovery</button
+          ><button data-tab="manage">Access & exchange</button>
+        </nav>
+        <section id="records-tab">
+          <p id="result-count" class="muted"></p>
+          <div id="results" class="cards"></div>
+          <section id="detail" class="panel" hidden></section>
+        </section>
+        <section id="patterns-tab" hidden class="panel">
+          <h2>Patterns & recovery</h2>
+          <div id="patterns"></div>
+        </section>
+        <section id="manage-tab" hidden class="panel">
+          <h2>Laboratories & access</h2>
+          <p>
+            Accounts are provisioned by the server operator. Laboratory owners
+            and administrators can access every project in their laboratory.
+            Other members need an explicit project role.
+          </p>
+          <div class="two">
+            <form id="lab-form">
+              <h3>Create a laboratory</h3>
+              <label>Name<input name="name" required maxlength="200" /></label
+              ><button>Create laboratory</button>
+            </form>
+            <form id="project-form">
+              <h3>Create a project</h3>
+              <label
+                >Laboratory<select id="lab" name="lab" required></select></label
+              ><label>Name<input name="name" required maxlength="200" /></label
+              ><label
+                >Description<textarea
+                  name="description"
+                  maxlength="3000"
+                ></textarea></label
+              ><button>Create project</button>
+            </form>
+          </div>
+          <div class="two">
+            <form id="lab-member-form">
+              <h3>Laboratory membership</h3>
+              <p class="muted">Uses the laboratory selected above.</p>
+              <label>Username<input name="username" required /></label
+              ><label
+                >Role<select name="role">
+                  <option>member</option>
+                  <option>admin</option>
+                  <option>remove</option>
+                </select></label
+              ><button>Apply laboratory role</button
+              ><button type="button" id="lab-members">Show members</button>
+            </form>
+            <form id="project-member-form">
+              <h3>Project membership</h3>
+              <p class="muted">Uses the project selected in the search bar.</p>
+              <label>Username<input name="username" required /></label
+              ><label
+                >Role<select name="role">
+                  <option>viewer</option>
+                  <option>editor</option>
+                  <option>admin</option>
+                  <option>remove</option>
+                </select></label
+              ><button>Apply project role</button
+              ><button type="button" id="project-members">Show members</button>
+            </form>
+          </div>
+          <pre id="members"></pre>
+          <h3>Structured exchange</h3>
+          <p>
+            Export only to an authorized destination. Downloaded copies are no
+            longer governed by this server’s permissions.
+          </p>
+          <label class="check"
+            ><input id="include-attachments" type="checkbox" />Include original
+            attachments (may contain sensitive information)</label
+          ><button id="export">Download project export</button
+          ><button id="events">View project audit events</button>
+          <pre id="event-list"></pre>
+          <form id="import-form">
+            <h3>Import an ELN record</h3>
+            <p class="muted">
+              Choose a schema 1.0 import JSON file; see the integration guide
+              for its structure.
+            </p>
+            <label
+              >Import file<input
+                name="file"
+                type="file"
+                accept=".json,application/json"
+                required /></label
+            ><button>Import into selected project</button>
+          </form>
+        </section>
+      </section>
+      <dialog id="editor">
+        <form id="record-form">
+          <div class="heading">
+            <h2 id="editor-title">Record an experiment</h2>
+            <button type="button" id="cancel-edit" class="secondary">
+              Cancel
+            </button>
+          </div>
+          <input
+            name="title"
+            aria-label="Experiment title"
+            placeholder="Experiment title"
+            required
+            maxlength="200"
+          />
+          <div class="two">
+            <label
+              >When performed<input
+                type="datetime-local"
+                name="performed_at"
+                required /></label
+            ><label
+              >Outcome<select name="status">
+                <option>failed</option>
+                <option>partial</option>
+                <option>succeeded</option>
+                <option>inconclusive</option>
+              </select></label
+            >
+          </div>
+          <label
+            >Summary<textarea name="summary" maxlength="4000"></textarea></label
+          ><label
+            >Procedure (one step per line)<textarea
+              name="procedure"
+            ></textarea></label
+          ><label
+            >Observed outcomes<textarea
+              name="outcomes"
+              required
+              maxlength="10000"
+            ></textarea></label
+          ><label
+            >Uncertainty and limitations<textarea
+              name="uncertainty_notes"
+              required
+              maxlength="4000"
+              placeholder="What remains uncertain? What was not measured?"
+            ></textarea></label
+          ><label>Tags (comma separated)<input name="tags" /></label>
+          <div id="structured-fields"></div>
+          <fieldset>
+            <legend>Provenance</legend>
+            <label
+              >Source type<select name="source_kind">
+                <option>notebook</option>
+                <option>eln</option>
+                <option>file</option>
+                <option>observation</option>
+              </select></label
+            ><label
+              >Source reference<input
+                name="source_reference"
+                required
+                maxlength="2000"
+                placeholder="Notebook ID / page, ELN record, or observation reference" /></label
+            ><label
+              >Source notes<textarea
+                name="source_notes"
+                maxlength="3000"
+              ></textarea>
+            </label>
+          </fieldset>
+          <p id="edit-error" role="alert"></p>
+          <button type="submit">Save experiment</button>
+        </form>
+      </dialog>
+    </main>
+    <footer>
+      Researcher observations are evidence to inspect. Suspected causes are not
+      established causal effects.
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+name: Tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m pytest -q
+      - run: node --check src/failure_memory/static/app.js
+  integrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[dev,integration]'
+      - run: python -m pip install 'git+https://github.com/yukevindai/chemdata-auditor.git@eff3ed3c43ec71e9ceecabc1f04d1dfb5c91c116' 'git+https://github.com/yukevindai/scientific-evidence-engine.git@01ee04ca9006854dc4d72fec8f005e041e4e2c22'
+      - run: python -m pytest -q tests/test_integrations.py
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -e .
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - name: Browser workflow on disposable synthetic database
+        env:
+          EFM_TEST_URL: http://127.0.0.1:8000
+          EFM_TEST_USER: demo
+          EFM_TEST_PASSWORD: ci-synthetic-password-only
+        run: |
+          failure-memory --database /tmp/efm-smoke.sqlite init
+          failure-memory --database /tmp/efm-smoke.sqlite create-user demo --display-name 'Synthetic researcher' --password-env EFM_TEST_PASSWORD
+          failure-memory --database /tmp/efm-smoke.sqlite serve --origin "$EFM_TEST_URL" --insecure-local > /tmp/efm-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent "$EFM_TEST_URL/" > /dev/null; then break; fi
+            sleep 1
+          done
+          node tests/browser-smoke.cjs
