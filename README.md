@@ -1,6 +1,30 @@
+<div align="center">
+
 # Experiment Failure Memory
 
+**Make unsuccessful experiments useful to the next researcher.**
+
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+[![MIT](https://img.shields.io/badge/License-MIT-22c55e)](LICENSE)
+
+[Capabilities](#what-you-can-do) · [Run locally](#run-locally) · [Backups](#backup-and-account-recovery) · [Integrations](#exchange-with-the-scientific-reliability-toolkit)
+
+</div>
+
+---
+
 A private, self-hosted application for preserving unsuccessful experiments and the lessons behind them. Researchers can search previous attempts, inspect the evidence behind suspected causes, and find out which recovery strategies were reported to work.
+
+
+## From an unsuccessful run to reusable knowledge
+
+| Capture | Connect | Reuse |
+| :--- | :--- | :--- |
+| Materials, conditions, observations, attachments, and uncertainty. | Related attempts, suspected causes, revisions, and attempted fixes. | Searchable records, inspectable comparisons, and portable exports. |
+
+**Browser workspace + JSON API + operator CLI**, backed by a local SQLite database. Access is scoped to laboratories and projects.
 
 ## What you can do
 
